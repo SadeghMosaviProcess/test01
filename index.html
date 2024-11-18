@@ -3,44 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Website</title>
+    <title>Camera with Processing</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 0;
-            padding: 0;
         }
-        video {
-            width: 100%;
+        video, canvas {
+            width: 80%;
             max-width: 500px;
+            margin: 20px auto;
             border: 2px solid #ccc;
             border-radius: 10px;
-            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <h1>Open Your Camera</h1>
-    <p>Click the button below to open your camera:</p>
+    <h1>Camera with Image Processing</h1>
     <button onclick="startCamera()">Open Camera</button>
-    <div>
-        <video id="video" autoplay playsinline></video>
-    </div>
+    <button onclick="processFrame()">Process Frame</button>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
 
     <script>
-        function startCamera() {
-            const video = document.getElementById("video");
+        let video = document.getElementById("video");
+        let canvas = document.getElementById("canvas");
+        let context = canvas.getContext("2d");
 
-            // دسترسی به دوربین
+        // باز کردن دوربین
+        function startCamera() {
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then((stream) => {
                     video.srcObject = stream;
                 })
                 .catch((err) => {
-                    alert("Error: Unable to access camera. Please check permissions.");
-                    console.error(err);
+                    console.error("Error accessing camera:", err);
                 });
+        }
+
+        // گرفتن فریم و ارسال به سرور
+        function processFrame() {
+            // کپی کردن فریم دوربین روی canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // تبدیل فریم به داده Base64
+            let frame = canvas.toDataURL("image/jpeg");
+
+            // ارسال فریم به سرور پایتون
+            fetch("http://127.0.0.1:5000/process", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ image: frame })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Processing Result: " + data.result);
+            })
+            .catch(err => {
+                console.error("Error processing frame:", err);
+            });
         }
     </script>
 </body>
