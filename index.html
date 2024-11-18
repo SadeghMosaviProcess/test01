@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        video {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Open Your Camera</h1>
+    <p>Click the button below to open your camera:</p>
+    <button onclick="startCamera()">Open Camera</button>
+    <div>
+        <video id="video" autoplay playsinline></video>
+    </div>
+
+    <script>
+        function startCamera() {
+            const video = document.getElementById("video");
+
+            // دسترسی به دوربین
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    video.srcObject = stream;
+                })
+                .catch((err) => {
+                    alert("Error: Unable to access camera. Please check permissions.");
+                    console.error(err);
+                });
+        }
+    </script>
+</body>
+</html>
